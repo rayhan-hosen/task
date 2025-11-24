@@ -1,0 +1,55 @@
+Error: CORS blocked from origin: http://localhost:5173
+    at origin (/home/techpriy/rtpm.site/backend/src/app.js:35:23)
+    at /home/techpriy/rtpm.site/backend/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/home/techpriy/rtpm.site/backend/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/home/techpriy/rtpm.site/backend/node_modules/cors/lib/index.js:204:7)
+    at Layer.handleRequest (/home/techpriy/rtpm.site/backend/node_modules/router/lib/layer.js:152:17)
+    at trimPrefix (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:342:13)
+    at /home/techpriy/rtpm.site/backend/node_modules/router/index.js:297:9
+    at processParams (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:582:12)
+    at next (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:291:5)
+    at Function.handle (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:186:3)
+Error: CORS blocked from origin: http://localhost:5173
+    at origin (/home/techpriy/rtpm.site/backend/src/app.js:35:23)
+    at /home/techpriy/rtpm.site/backend/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/home/techpriy/rtpm.site/backend/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/home/techpriy/rtpm.site/backend/node_modules/cors/lib/index.js:204:7)
+    at Layer.handleRequest (/home/techpriy/rtpm.site/backend/node_modules/router/lib/layer.js:152:17)
+    at trimPrefix (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:342:13)
+    at /home/techpriy/rtpm.site/backend/node_modules/router/index.js:297:9
+    at processParams (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:582:12)
+    at next (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:291:5)
+    at Function.handle (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:186:3)
+Error: CORS blocked from origin: http://localhost:5173
+    at origin (/home/techpriy/rtpm.site/backend/src/app.js:35:23)
+    at /home/techpriy/rtpm.site/backend/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/home/techpriy/rtpm.site/backend/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/home/techpriy/rtpm.site/backend/node_modules/cors/lib/index.js:204:7)
+    at Layer.handleRequest (/home/techpriy/rtpm.site/backend/node_modules/router/lib/layer.js:152:17)
+    at trimPrefix (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:342:13)
+    at /home/techpriy/rtpm.site/backend/node_modules/router/index.js:297:9
+    at processParams (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:582:12)
+    at next (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:291:5)
+    at Function.handle (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:186:3)
+Error: CORS blocked from origin: http://localhost:5173
+    at origin (/home/techpriy/rtpm.site/backend/src/app.js:35:23)
+    at /home/techpriy/rtpm.site/backend/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/home/techpriy/rtpm.site/backend/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/home/techpriy/rtpm.site/backend/node_modules/cors/lib/index.js:204:7)
+    at Layer.handleRequest (/home/techpriy/rtpm.site/backend/node_modules/router/lib/layer.js:152:17)
+    at trimPrefix (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:342:13)
+    at /home/techpriy/rtpm.site/backend/node_modules/router/index.js:297:9
+    at processParams (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:582:12)
+    at next (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:291:5)
+    at Function.handle (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:186:3)
+Error: CORS blocked from origin: http://localhost:5173
+    at origin (/home/techpriy/rtpm.site/backend/src/app.js:35:23)
+    at /home/techpriy/rtpm.site/backend/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/home/techpriy/rtpm.site/backend/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/home/techpriy/rtpm.site/backend/node_modules/cors/lib/index.js:204:7)
+    at Layer.handleRequest (/home/techpriy/rtpm.site/backend/node_modules/router/lib/layer.js:152:17)
+    at trimPrefix (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:342:13)
+    at /home/techpriy/rtpm.site/backend/node_modules/router/index.js:297:9
+    at processParams (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:582:12)
+    at next (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:291:5)
+    at Function.handle (/home/techpriy/rtpm.site/backend/node_modules/router/index.js:186:3)
