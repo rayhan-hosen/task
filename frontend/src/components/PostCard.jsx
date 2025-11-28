@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import CommentItem from './CommentItem';
@@ -20,37 +20,31 @@ export default function PostCard({ post }) {
     const { user } = useAuth();
 
     useEffect(() => {
-        const initializeComments = async () => {
-            if (Array.isArray(post.comments) && post.comments.length > 0 && !showAllComments) {
-                const latestComment = post.comments[0];
-
-                // If the latest comment is a reply (has parentId), fetch all comments to find the parent
-                if (latestComment.parentId) {
-                    try {
-                        const { data } = await api.get(`/posts/${post.id}/comments`);
-                        // Find the parent comment in the root comments list
-                        const parentComment = data.find((c) => c.id === latestComment.parentId);
-
-                        if (parentComment) {
-                            // Show parent comment but hide the replies initially
-                            setComments([{ ...parentComment, replies: [] }]);
-                        } else {
-                            // Fallback if parent not found (shouldn't happen normally)
-                            setComments(post.comments);
-                        }
-                    } catch (error) {
-                        console.error('Failed to fetch parent comment context', error);
-                        setComments(post.comments);
-                    }
-                } else {
-                    // It's a root comment, display as is
-                    setComments(post.comments);
-                }
+        if (!showAllComments) {
+            if (post.comments && post.comments.length > 0) {
+                // Show only the root comments, hiding nested replies for the preview
+                const previewComments = post.comments.map(c => ({
+                    ...c,
+                    replies: []
+                }));
+                setComments(previewComments);
+            } else {
+                setComments([]);
             }
-        };
+        }
+    }, [post.comments, showAllComments]);
 
-        initializeComments();
-    }, [post.comments, showAllComments, post.id]);
+    const displayedCommentsCount = useMemo(() => {
+        const countRecursive = (list) => {
+            let count = 0;
+            list.forEach(c => {
+                count++;
+                if (c.replies) count += countRecursive(c.replies);
+            });
+            return count;
+        };
+        return countRecursive(comments);
+    }, [comments]);
 
     const handleLike = async () => {
         try {
@@ -221,10 +215,10 @@ export default function PostCard({ post }) {
 
                 <div className="_timline_comment_main">
                     {/* View Previous Comments Link */}
-                    {!showAllComments && post._count.comments > 1 && (
+                    {!showAllComments && post._count.comments > displayedCommentsCount && (
                         <div className="_previous_comment">
                             <button type="button" className="_previous_comment_txt" onClick={handleViewPreviousComments}>
-                                View {post._count.comments - 1} previous comments
+                                View {post._count.comments - displayedCommentsCount} previous comments
                             </button>
                         </div>
                     )}

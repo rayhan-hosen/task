@@ -1,0 +1,186 @@
+# AppifyLab Task - Social Media Platform Engineering Documentation
+
+## 1. Executive Summary
+This document outlines the architectural design, implementation details, and engineering decisions for the Social Media Platform task assigned by AppifyLab. The objective was to transform static HTML/CSS templates (Login, Register, Feed) into a fully functional, full-stack web application using React.js and a robust backend system.
+
+The solution is built as a **Monorepo** containing a **React (Vite)** frontend and a **Node.js (Express)** backend, utilizing **MySQL** with **Prisma ORM** for data persistence. This architecture was chosen to ensure scalability, type safety, and a seamless user experience, adhering to the requirement of handling potential high-volume traffic.
+
+---
+
+## 2. Task Requirements & Scope
+
+### 2.1 Core Objectives
+- **Frontend Conversion**: Migrate provided HTML/CSS designs to a component-based React application.
+- **Full-Stack Implementation**: Build a supporting backend API and database.
+- **Design Fidelity**: Maintain strict adherence to the provided visual design.
+
+### 2.2 Feature Implementation Status
+
+| Feature Category | Requirement | Implementation Detail |
+|------------------|-------------|-----------------------|
+| **Authentication** | Secure Auth System (Session/JWT) | Implemented **JWT (JSON Web Tokens)** for stateless, secure authentication. |
+| | Registration Fields | Captures First Name, Last Name, Email, Password. |
+| | Login/Signup Flow | Users can sign up and log in to access protected routes. |
+| **Feed Page** | Protected Route | Feed is accessible only after valid authentication. |
+| | Global Feed | Displays posts from all registered users. |
+| | Sorting | Posts are ordered by `createdAt` descending (Newest first). |
+| **Post Functionality** | Create Post | Supports rich text and **Image Uploads**. |
+| | Privacy Settings | **Public**: Visible to all. **Private**: Visible only to author. |
+| **Interactions** | Likes | Toggle like/unlike on Posts, Comments, and Replies. |
+| | Comments | Supports threaded (nested) comments and replies. |
+| | Visibility | Shows list of users who liked a specific item. |
+
+---
+
+## 3. System Architecture
+
+### 3.1 Tech Stack
+- **Frontend**: React.js (v18), Vite, Vanilla CSS (scoped via modules/global), React Router v6.
+- **Backend**: Node.js, Express.js.
+- **Database**: MySQL (Relational DB for structured data integrity).
+- **ORM**: Prisma (Schema modeling, migrations, and type-safe queries).
+- **Storage**: Local filesystem for uploads (scalable to S3/Cloudinary).
+
+### 3.2 High-Level Design
+The system follows a **Client-Server** architecture:
+1.  **Client**: React SPA (Single Page Application) consumes REST APIs. Handles state management via React Context (`AuthContext`).
+2.  **Server**: Stateless REST API. Handles business logic, validation, and DB interactions.
+3.  **Database**: Stores Users, Posts, Comments, and Likes with strict foreign key relationships.
+
+---
+
+## 4. Engineering Decisions & Best Practices
+
+### 4.1 Scalability & Performance ("Millions of Posts")
+To address the requirement of designing for scale:
+- **Database Indexing**:
+    - `@@index([createdAt])`: Ensures O(log N) retrieval for the chronological feed.
+    - `@@index([authorId])`: Optimizes lookups for user profiles.
+    - `@@index([privacy, createdAt])`: Efficient filtering for public vs private feeds.
+- **Pagination Strategy**: The backend supports limit/offset (or cursor-based) pagination principles to avoid loading "millions" of records into memory (implemented as `take`/`skip` in Prisma).
+- **Optimistic UI**: The frontend updates Like counts and Comment lists immediately before the server responds, providing a "snappy" UX.
+
+### 4.2 Security Measures
+- **Input Sanitization**: All user inputs are sanitized on the backend to prevent **XSS (Cross-Site Scripting)**.
+- **SQL Injection Prevention**: Prisma ORM uses parameterized queries by default, neutralizing SQL injection risks.
+- **Password Hashing**: Passwords are hashed using `bcrypt` before storage.
+- **Rate Limiting**: API endpoints are protected against abuse.
+- **Authorization Middleware**: Custom middleware verifies JWT tokens before allowing access to private routes (`/feed`, `/api/posts`).
+
+### 4.3 User Experience (UX)
+- **Responsive Design**: Mobile-first approach ensuring usability across devices.
+- **Feedback Loops**: Loading states and toast notifications for user actions (e.g., "Post Created", "Login Failed").
+- **Image Previews**: Immediate visual feedback when selecting images for upload.
+
+---
+
+## 5. Data Model (Prisma Schema)
+
+The database schema is normalized to 3NF to reduce redundancy.
+
+```prisma
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String   // Hashed
+  posts     Post[]
+  comments  Comment[]
+  likes     Like[]
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  content   String?  @db.Text
+  imageUrl  String?
+  privacy   Privacy  @default(PUBLIC) // Enum: PUBLIC, PRIVATE
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  comments  Comment[]
+  likes     Like[]
+  
+  @@index([createdAt]) // Critical for feed performance
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  postId    Int
+  parentId  Int?     // Self-referencing for nested replies
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+}
+
+model Like {
+  userId    Int
+  postId    Int?
+  commentId Int?
+  
+  @@unique([userId, postId, commentId]) // Prevents double-liking
+}
+```
+
+---
+
+## 6. API Documentation
+
+### Authentication
+- `POST /api/auth/register`: Create account.
+- `POST /api/auth/login`: Authenticate and receive JWT.
+- `GET /api/auth/me`: Validate session.
+
+### Posts & Feed
+- `GET /api/posts`: Fetch global feed (respects privacy settings).
+- `POST /api/posts`: Create new content (multipart/form-data for images).
+- `POST /api/posts/:id/like`: Toggle like status.
+
+### Comments
+- `GET /api/posts/:id/comments`: Fetch discussion thread.
+- `POST /api/posts/:id/comments`: Add comment or reply.
+
+---
+
+## 7. Deliverables Checklist
+
+- [x] **GitHub Repository**: Complete source code with clear commit history.
+- [x] **Video Walkthrough**: Demonstration of Login, Registration, Feed scrolling, Posting (Text/Image), Liking, and Commenting.
+- [x] **Live Deployment**: Application deployed to a live server environment.
+- [x] **Documentation**: This detailed engineering overview.
+
+---
+
+**Author**: Rayhan Hosen
+**Date**: November 2025
+
+---
+
+## 8. High-Level Data Flow Diagram (DFD)
+
+The following diagram represents the high-level data flow within the system, illustrating interactions between the User, Frontend, Backend, and Data Stores.
+
+```mermaid
+graph TD
+    %% Entities
+    User((User))
+    Frontend[Frontend UI]
+    Backend[Backend API]
+    DB[(MySQL Database)]
+    FS[File Storage]
+
+    %% Data Flows
+    User -- "1. Credentials / Actions" --> Frontend
+    Frontend -- "2. HTTP Requests (JSON/Multipart)" --> Backend
+    
+    %% Backend Processing
+    Backend -- "3. Validate & Auth" --> Backend
+    
+    %% Database Interactions
+    Backend -- "4. Query / Update User Data" <--> DB
+    Backend -- "5. Store / Fetch Post Metadata" <--> DB
+    
+    %% File Handling
+    Backend -- "6. Save / Retrieve Images" <--> FS
+    
+    %% Responses
+    Backend -- "7. JSON Response / JWT" --> Frontend
+    Frontend -- "8. Render UI" --> User
+```
+

@@ -70,6 +70,33 @@ const getFeed = async (req, res) => {
             },
         });
 
+        // Fetch ancestors for the latest comments
+        let allComments = posts.flatMap(p => p.comments);
+        let commentsToCheck = [...allComments];
+
+        // Recursively fetch parents (up to 10 levels deep to prevent infinite loops)
+        for (let i = 0; i < 10; i++) {
+            const parentIds = commentsToCheck
+                .filter(c => c.parentId)
+                .map(c => c.parentId);
+
+            if (parentIds.length === 0) break;
+
+            // Fetch parents
+            const parents = await prisma.comment.findMany({
+                where: { id: { in: parentIds } },
+                include: {
+                    author: { select: { id: true, firstName: true, lastName: true } },
+                    _count: { select: { likes: true } }
+                }
+            });
+
+            if (parents.length === 0) break;
+
+            allComments.push(...parents);
+            commentsToCheck = parents;
+        }
+
         // Fetch all likes for these posts in a single query
         const postIds = posts.map(p => p.id);
         const allPostLikes = await prisma.like.findMany({
@@ -84,12 +111,8 @@ const getFeed = async (req, res) => {
             }
         });
 
-        // Get all comment IDs from the latest comments
-        const commentIds = posts
-            .flatMap(p => p.comments)
-            .map(c => c.id);
-
         // Fetch all likes for these comments in a single query
+        const commentIds = allComments.map(c => c.id);
         const allCommentLikes = await prisma.like.findMany({
             where: {
                 commentId: { in: commentIds },
@@ -124,15 +147,36 @@ const getFeed = async (req, res) => {
         const postsWithData = posts.map(post => {
             const postLikes = likesByPost[post.id] || [];
 
+            // Filter comments for this post
+            const postComments = allComments.filter(c => c.postId === post.id);
+
+            // Sort by createdAt ASC to build tree correctly
+            postComments.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
             // Process comments to add likes data
-            const commentsWithLikes = post.comments.map(comment => {
+            const processedComments = postComments.map(comment => {
                 const commentLikes = likesByComment[comment.id] || [];
                 return {
                     ...comment,
                     likes: commentLikes,
                     isLiked: commentLikes.some(like => like.userId === userId),
                     likedBy: commentLikes.map(like => like.user),
+                    replies: [] // Initialize replies
                 };
+            });
+
+            // Build Tree
+            const commentMap = {};
+            const rootComments = [];
+
+            processedComments.forEach(c => commentMap[c.id] = c);
+
+            processedComments.forEach(comment => {
+                if (comment.parentId && commentMap[comment.parentId]) {
+                    commentMap[comment.parentId].replies.push(comment);
+                } else {
+                    rootComments.push(comment);
+                }
             });
 
             return {
@@ -140,7 +184,7 @@ const getFeed = async (req, res) => {
                 likes: postLikes,
                 isLiked: postLikes.some(like => like.userId === userId),
                 likedBy: postLikes.map(like => like.user),
-                comments: commentsWithLikes,
+                comments: rootComments,
             };
         });
 
